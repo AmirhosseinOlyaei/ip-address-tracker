@@ -11,16 +11,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.iptracker.app",
-      "infoPlist": {
-        "NSAppTransportSecurity": {
-          "NSExceptionDomains": {
-            "ip-api.com": {
-              "NSExceptionAllowsInsecureHTTPLoads": true,
-              "NSIncludesSubdomains": true
-            }
-          }
-        }
-      }
+      "buildNumber": "1",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {}
     },
     "android": {
       "adaptiveIcon": {
@@ -54,6 +49,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8feded3f-f0f3-439d-9516-13bf3a4b6075"
+      }
+    },
+    "owner": "devartslab"
   }
 }
