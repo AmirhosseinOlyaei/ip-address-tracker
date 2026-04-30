@@ -1,50 +1,153 @@
-# Welcome to your Expo app 👋
+<p align="center">
+  <img src="assets/images/Screenshot-ip-tracker.png" alt="Tracker screen" width="80%" />
+</p>
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+<p align="center">
+  <img src="assets/images/Screenshot-history.png" alt="History screen" width="80%" />
+</p>
 
-## Get started
+<h1 align="center">IP Address Tracker</h1>
 
-1. Install dependencies
+<p align="center">
+  A cross-platform app to geolocate any IP address or domain — with an interactive map, detailed network info, and persistent search history.
+</p>
 
-   ```bash
-   npm install
-   ```
+<p align="center">
+  <a href="https://ip-address-tracker-devartslab.netlify.app">🌐 Live Demo</a>
+</p>
 
-2. Start the app
+## Table of Contents
 
-   ```bash
-   npx expo start
-   ```
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Running on Web](#running-on-web)
+- [Running on iOS](#running-on-ios)
+- [Project Structure](#project-structure)
+- [Deployment](#deployment)
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Features
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- **IP & domain lookup** — geolocate any IPv4, IPv6, or domain name
+- **Interactive map** — Leaflet (web) / Apple Maps (iOS) with animated marker
+- **Geo details** — city, region, country, timezone, ISP, ZIP code
+- **Auto-detect** — looks up your own IP on launch
+- **Search history** — persisted locally, tap any entry to re-lookup
+- **Dark / light mode** — follows system theme
+- **Responsive** — works on web, iOS, and Android
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## Tech Stack
+
+| Layer        | Technology                                       |
+| ------------ | ------------------------------------------------ |
+| Framework    | Expo 54 + Expo Router (file-based routing)       |
+| Language     | TypeScript                                       |
+| UI           | React Native + react-native-web                  |
+| Map (web)    | Leaflet via iframe                               |
+| Map (iOS)    | react-native-maps (Apple Maps)                   |
+| Animations   | react-native-reanimated v4                       |
+| Blur / Glass | expo-blur                                        |
+| Gradient     | expo-linear-gradient                             |
+| Storage      | @react-native-async-storage/async-storage        |
+| Geo API      | ip-api.com (via Netlify serverless proxy on web) |
+| Own-IP API   | api.ipify.org                                    |
+| Hosting      | Netlify (static export + serverless function)    |
+
+---
+
+## Getting Started
 
 ```bash
-npm run reset-project
+# Install dependencies
+npm install
+
+# Start the dev server
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## Running on Web
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+# Local development (Metro only)
+npx expo start --web
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+# Local development with Netlify functions proxy (fixes CORS)
+npx netlify-cli dev --target-port 8081 --framework '#custom'
+# Then open http://localhost:8888
+```
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+## Running on iOS
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+# Run in iOS Simulator (requires Xcode)
+npx expo run:ios
+
+# Or open the workspace directly
+open ios/*.xcworkspace
+```
+
+---
+
+## Project Structure
+
+```
+app/
+  _layout.tsx          # Root layout, wraps IpTrackerProvider
+  (tabs)/
+    _layout.tsx        # Tab navigator (Tracker + History)
+    index.tsx          # Tracker screen
+    history.tsx        # History screen
+components/
+  MapContainer.tsx     # Native map (iOS/Android)
+  MapContainer.web.tsx # Leaflet iframe map (web)
+  IpInfoCard.tsx       # Geo info card with glassmorphism
+  SearchBar.tsx        # IP/domain search input
+context/
+  IpTrackerContext.tsx # Global state (useReducer)
+services/
+  ipService.ts         # getOwnIp(), lookupIp()
+  historyService.ts    # AsyncStorage history CRUD
+constants/
+  theme.ts             # Colors, spacing, typography
+netlify/
+  functions/geo.js     # Serverless proxy for ip-api.com
+```
+
+---
+
+## Deployment
+
+The app is deployed to Netlify as a static web export with a serverless function that proxies geo API requests to avoid CORS restrictions.
+
+```bash
+# Build and deploy
+npx expo export -p web
+npx netlify-cli deploy --dir=dist --prod
+```
+
+Live URL: **https://ip-address-tracker-devartslab.netlify.app**
+
+## Acknowledgments
+
+Special thanks and a shout out to the following individuals and organizations:
+
+- [Per Scholas](https://www.perscholas.org/) for their exceptional coding school, providing valuable learning resources and support.
+- Our instructor [Darnell Champen](https://www.linkedin.com/in/darnell-champen/) for his guidance, mentorship, and countless hours of dedication for the success of our team.
+- Hat tip to anyone whose libraries were used.
+
+<a id="author"></a>
+
+## 👨‍💻 Author
+
+[![DevArts Lab](https://img.shields.io/badge/DevArts%20Lab-Visit%20Website-0A66C2?style=for-the-badge&logo=google-chrome&logoColor=white)](http://devartslab.com/)
+
+Boston, MA, USA <br>
+2026
