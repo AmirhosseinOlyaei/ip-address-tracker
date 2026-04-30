@@ -1,16 +1,15 @@
+functionsDirectory = "/Users/ao/perscholas/react-alumni-class/ip-address-tracker/netlify/functions"
+functionsDirectoryOrigin = "default"
 redirectsOrigin = "config"
 plugins = []
 headers = []
-
-[functions]
-
-[functions."*"]
 
 [build]
 publish = "/Users/ao/perscholas/react-alumni-class/ip-address-tracker/dist"
 publishOrigin = "config"
 commandOrigin = "config"
 command = "npx expo export -p web"
+functions = "/Users/ao/perscholas/react-alumni-class/ip-address-tracker/netlify/functions"
 
 [build.environment]
 
@@ -25,6 +24,10 @@ command = "npx expo export -p web"
 [build.processing.js]
 
 [build.services]
+
+[functions]
+
+[functions."*"]
 
 [[redirects]]
 from = "/*"

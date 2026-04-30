@@ -1,6 +1,16 @@
 import { AppError, IpGeoData } from "@/types"
+import { Platform } from "react-native"
+
 const IPIFY_URL = "https://api.ipify.org?format=json"
-const GEO_BASE = "https://ipapi.co"
+const GEO_FIELDS =
+  "status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,query"
+const GEO_BASE_NATIVE = "http://ip-api.com/json"
+const GEO_PROXY_WEB = "/.netlify/functions/geo"
+const IS_LOCALHOST =
+  Platform.OS === "web" &&
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1")
 
 function buildAppError(e: unknown): AppError {
   if (e instanceof TypeError && e.message.toLowerCase().includes("network")) {
@@ -46,11 +56,14 @@ export async function lookupIp(query: string): Promise<IpGeoData> {
     })
   }
 
-  const url = `${GEO_BASE}/${encodeURIComponent(trimmed)}/json/`
+  const url =
+    Platform.OS !== "web" || IS_LOCALHOST
+      ? `${GEO_BASE_NATIVE}/${encodeURIComponent(trimmed)}?fields=${GEO_FIELDS}`
+      : `${GEO_PROXY_WEB}?q=${encodeURIComponent(trimmed)}`
   let res: Response
 
   try {
-    res = await fetch(url, { headers: { Accept: "application/json" } })
+    res = await fetch(url)
   } catch {
     throw new AppServiceError({
       code: "NETWORK",
@@ -74,8 +87,8 @@ export async function lookupIp(query: string): Promise<IpGeoData> {
 
   const data = await res.json()
 
-  if (data.error) {
-    if (data.reason === "private range" || data.reason === "reserved range") {
+  if (data.status === "fail") {
+    if (data.message === "private range" || data.message === "reserved range") {
       throw new AppServiceError({
         code: "NOT_FOUND",
         message:
@@ -89,16 +102,16 @@ export async function lookupIp(query: string): Promise<IpGeoData> {
   }
 
   return {
-    ip: data.ip ?? trimmed,
+    ip: data.query ?? trimmed,
     city: data.city ?? "Unknown",
-    region: data.region ?? "Unknown",
-    country: data.country_name ?? "Unknown",
-    countryCode: data.country_code ?? "",
-    zip: data.postal ?? "",
-    lat: data.latitude,
-    lon: data.longitude,
+    region: data.regionName ?? data.region ?? "Unknown",
+    country: data.country ?? "Unknown",
+    countryCode: data.countryCode ?? "",
+    zip: data.zip ?? "",
+    lat: data.lat,
+    lon: data.lon,
     timezone: data.timezone ?? "Unknown",
-    isp: data.org ?? "Unknown",
+    isp: data.isp ?? "Unknown",
     query: trimmed,
   }
 }
