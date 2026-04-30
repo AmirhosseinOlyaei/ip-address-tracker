@@ -1,98 +1,146 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { ErrorBanner } from "@/components/ErrorBanner"
+import { IpInfoCard } from "@/components/IpInfoCard"
+import { LoadingOverlay } from "@/components/LoadingOverlay"
+import { MapContainer } from "@/components/MapContainer"
+import { SearchBar } from "@/components/SearchBar"
+import { Colors, Radius, Shadow, Spacing, Typography } from "@/constants/theme"
+import { useIpTracker } from "@/context/IpTrackerContext"
+import { useColorScheme } from "@/hooks/use-color-scheme"
+import { LinearGradient } from "expo-linear-gradient"
+import { StatusBar } from "expo-status-bar"
+import React, { useCallback } from "react"
+import { StyleSheet, Text, View } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function TrackerScreen() {
+  const scheme = useColorScheme() ?? "light"
+  const c = Colors[scheme]
+  const { current, status, error, lookup, lookupSelf } = useIpTracker()
 
-export default function HomeScreen() {
+  const handleSearch = useCallback(
+    (query: string) => {
+      lookup(query)
+    },
+    [lookup],
+  )
+
+  const handleRetry = useCallback(() => {
+    if (current) {
+      lookup(current.query)
+    } else {
+      lookupSelf()
+    }
+  }, [current, lookup, lookupSelf])
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View style={[styles.root, { backgroundColor: c.background }]}>
+      <StatusBar style={c.statusBar} />
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+      <LinearGradient
+        colors={[c.gradientStart, c.gradientEnd]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.header}
+      >
+        <SafeAreaView edges={["top"]} style={styles.headerInner}>
+          <Text style={styles.headerTitle}>IP Tracker</Text>
+          <Text style={styles.headerSubtitle}>
+            {current
+              ? `${current.city}, ${current.country}`
+              : "Detecting your location\u2026"}
+          </Text>
+          <View style={styles.searchWrapper}>
+            <SearchBar onSearch={handleSearch} loading={status === "loading"} />
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
+
+      {error && status === "error" && (
+        <ErrorBanner error={error} onRetry={handleRetry} />
+      )}
+
+      <View style={styles.mapWrapper}>
+        <MapContainer data={current} />
+        {status === "loading" && <LoadingOverlay />}
+      </View>
+
+      {current && (
+        <View style={[styles.cardWrapper, { shadowColor: c.shadow }]}>
+          <IpInfoCard data={current} />
+        </View>
+      )}
+
+      {!current && status !== "loading" && status !== "error" && (
+        <View
+          style={[
+            styles.emptyCard,
+            { backgroundColor: c.surface, borderColor: c.border, ...Shadow.md },
+          ]}
+        >
+          <Text style={[styles.emptyText, { color: c.textSecondary }]}>
+            Enter an IP address or domain above to get started.
+          </Text>
+        </View>
+      )}
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  root: {
+    flex: 1,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  header: {
+    zIndex: 2,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
+  headerInner: {
+    paddingTop: Spacing.sm,
+    paddingBottom: 0,
+  },
+  headerTitle: {
+    ...Typography.displayMd,
+    color: "#FFFFFF",
+    textAlign: "center",
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.xs,
+    textShadowColor: "rgba(0,0,0,0.2)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+  headerSubtitle: {
+    ...Typography.bodyMd,
+    color: "rgba(255,255,255,0.80)",
+    textAlign: "center",
+    marginBottom: Spacing.md,
+  },
+  searchWrapper: {
+    paddingBottom: Spacing.md,
+  },
+  mapWrapper: {
+    flex: 1,
+    position: "relative",
+  },
+  cardWrapper: {
+    position: "absolute",
     bottom: 0,
     left: 0,
-    position: 'absolute',
+    right: 0,
+    zIndex: 5,
   },
-});
+  emptyCard: {
+    position: "absolute",
+    bottom: Spacing.xl,
+    left: Spacing.md,
+    right: Spacing.md,
+    borderRadius: Radius.xl,
+    borderWidth: 1,
+    padding: Spacing.lg,
+    alignItems: "center",
+    zIndex: 5,
+  },
+  emptyText: {
+    ...Typography.bodyMd,
+    textAlign: "center",
+    lineHeight: 22,
+  },
+})
