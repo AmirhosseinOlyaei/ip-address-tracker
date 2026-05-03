@@ -1,43 +1,64 @@
-import React from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
-import { BlurView } from 'expo-blur';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors, Radius, Shadow, Spacing, Typography } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { IpGeoData } from '@/types';
+import { Colors, Radius, Shadow, Spacing, Typography } from "@/constants/theme"
+import { useColorScheme } from "@/hooks/use-color-scheme"
+import { IpGeoData } from "@/types"
+import { Ionicons } from "@expo/vector-icons"
+import { BlurView } from "expo-blur"
+import React from "react"
+import { Platform, StyleSheet, Text, View } from "react-native"
 
 interface IpInfoCardProps {
-  data: IpGeoData;
+  data: IpGeoData
 }
 
 interface InfoFieldProps {
-  label: string;
-  value: string;
-  iconName: keyof typeof Ionicons.glyphMap;
-  tintColor: string;
-  textColor: string;
-  secondaryColor: string;
-  borderColor: string;
-  isLast?: boolean;
+  label: string
+  value: string
+  iconName: keyof typeof Ionicons.glyphMap
+  tintColor: string
+  textColor: string
+  secondaryColor: string
+  borderColor: string
+  isLast?: boolean
 }
 
-function InfoField({ label, value, iconName, tintColor, textColor, secondaryColor, borderColor, isLast }: InfoFieldProps) {
+function InfoField({
+  label,
+  value,
+  iconName,
+  tintColor,
+  textColor,
+  secondaryColor,
+  borderColor,
+  isLast,
+}: InfoFieldProps) {
   return (
-    <View style={[styles.field, !isLast && { borderRightWidth: 1, borderRightColor: borderColor }]}>
+    <View
+      style={[
+        styles.field,
+        !isLast && { borderRightWidth: 1, borderRightColor: borderColor },
+      ]}
+    >
       <View style={styles.fieldIcon}>
         <Ionicons name={iconName} size={14} color={tintColor} />
-        <Text style={[styles.fieldLabel, { color: secondaryColor }]}>{label}</Text>
+        <Text style={[styles.fieldLabel, { color: secondaryColor }]}>
+          {label}
+        </Text>
       </View>
-      <Text style={[styles.fieldValue, { color: textColor }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>
-        {value || '—'}
+      <Text
+        style={[styles.fieldValue, { color: textColor }]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.75}
+      >
+        {value || "—"}
       </Text>
     </View>
-  );
+  )
 }
 
 export function IpInfoCard({ data }: IpInfoCardProps) {
-  const scheme = useColorScheme() ?? 'light';
-  const c = Colors[scheme];
+  const scheme = useColorScheme() ?? "light"
+  const c = Colors[scheme]
 
   const cardContent = (
     <View style={styles.row}>
@@ -61,7 +82,7 @@ export function IpInfoCard({ data }: IpInfoCardProps) {
       />
       <InfoField
         label="Timezone"
-        value={data.timezone.replace('/', ' / ')}
+        value={data.timezone.replace("/", " / ")}
         iconName="time-outline"
         tintColor={c.tint}
         textColor={c.text}
@@ -79,7 +100,7 @@ export function IpInfoCard({ data }: IpInfoCardProps) {
         isLast
       />
     </View>
-  );
+  )
 
   const containerStyle = [
     styles.container,
@@ -88,37 +109,37 @@ export function IpInfoCard({ data }: IpInfoCardProps) {
       borderColor: c.border,
       ...Shadow.lg,
     },
-  ];
+  ]
 
-  if (Platform.OS === 'ios') {
+  if (Platform.OS === "ios") {
     return (
       <BlurView
-        intensity={scheme === 'dark' ? 60 : 80}
-        tint={scheme === 'dark' ? 'dark' : 'light'}
+        intensity={scheme === "dark" ? 60 : 80}
+        tint={scheme === "dark" ? "dark" : "light"}
         style={containerStyle}
       >
         {cardContent}
       </BlurView>
-    );
+    )
   }
 
   return (
     <View style={[containerStyle, { backgroundColor: c.cardBlur }]}>
       {cardContent}
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   container: {
     borderRadius: Radius.xl,
     borderWidth: 1,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginHorizontal: Spacing.md,
     marginBottom: Spacing.md,
   },
   row: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.sm,
   },
@@ -128,8 +149,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   fieldIcon: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
   },
   fieldLabel: {
@@ -139,4 +160,4 @@ const styles = StyleSheet.create({
     ...Typography.headingSm,
     lineHeight: 20,
   },
-});
+})
